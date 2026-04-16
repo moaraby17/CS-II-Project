@@ -1,0 +1,87 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class MainWindow {
+  - Game m_game
+  - QGraphicsView* m_view
+  - QGraphicsScene* m_scene
+  - QLabel* m_hpLabel
+  - QLabel* m_statusLabel
+  + MainWindow(QWidget* parent = nullptr)
+  + keyPressEvent(QKeyEvent* event)
+  - renderGame()
+  - showLevelCompleteMessage()
+}
+
+class Game {
+  - Level m_level
+  - Player m_player
+  - QString m_statusText
+  - bool m_levelComplete
+  + startLevel1()
+  + handlePlayerMove(int dx, int dy)
+  + level() : const Level&
+  + player() : const Player&
+  + statusText() : QString
+  + isLevelComplete() : bool
+  - playerTurn(int dx, int dy)
+  - enemyTurn()
+}
+
+class Level {
+  - int m_width
+  - int m_height
+  - QVector<QVector<Tile>> m_tiles
+  - QPoint m_playerStart
+  - QPoint m_goalPosition
+  - QVector<Enemy> m_enemies
+  + loadLevel1()
+  + isWalkable(int x, int y) : bool
+  + tileTypeAt(int x, int y) : TileType
+  + enemies() : QVector<Enemy>&
+}
+
+class Entity {
+  # int m_x
+  # int m_y
+  # int m_health
+  # int m_maxHealth
+  + setPosition(int x, int y)
+  + takeDamage(int amount)
+  + isAlive() : bool
+}
+
+class Player {
+  - int m_attackDamage
+  + attackDamage() : int
+}
+
+class Enemy {
+  - int m_attackDamage
+  + attackDamage() : int
+}
+
+class Tile {
+  - TileType m_type
+  + setType(TileType type)
+  + type() : TileType
+  + isWalkable() : bool
+}
+
+enum TileType {
+  Floor
+  Wall
+  Trap
+  Goal
+}
+
+Entity <|-- Player
+Entity <|-- Enemy
+Level *-- Tile
+Level *-- Enemy
+Game *-- Level
+Game *-- Player
+MainWindow *-- Game
+Tile --> TileType
+MainWindow ..> Game : uses
+@enduml
