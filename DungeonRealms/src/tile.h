@@ -1,11 +1,14 @@
 #ifndef TILE_H
 #define TILE_H
 
+// Simple list of tile types used by the dungeon grid.
 enum class TileType {
     Floor,
     Wall,
     Trap,
-    Goal
+    Goal,
+    LockedDoor,
+    Key
 };
 
 class Tile {
