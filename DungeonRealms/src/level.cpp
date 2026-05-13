@@ -1,45 +1,134 @@
 #include "level.h"
 
-Level::Level() : m_width(10), m_height(10) {
-    loadLevel1();
+Level::Level() : m_width(0), m_height(0), m_number(1) {
+    loadLevel(1);
 }
 
-void Level::loadLevel1() {
-    m_tiles = QVector<QVector<Tile>>(m_height, QVector<Tile>(m_width, Tile(TileType::Floor)));
+void Level::loadLevel(int levelNumber) {
+    m_number = levelNumber;
 
-    for (int x = 0; x < m_width; ++x) {
-        m_tiles[0][x].setType(TileType::Wall);
-        m_tiles[m_height - 1][x].setType(TileType::Wall);
+    // Legend: # wall, . floor, P player, E basic enemy, A archer,
+    // B brute, ^ trap, K key, D locked door, X exit/treasure.
+    switch (levelNumber) {
+    case 1:
+        loadFromMap({
+                        "##########",
+                        "#P...E...#",
+                        "#..##....#",
+                        "#.....^..#",
+                        "#........#",
+                        "#....#...#",
+                        "#....#...#",
+                        "#..^.#.E.#",
+                        "#.......X#",
+                        "##########"},
+                    "Training Halls");
+        break;
+    case 2:
+        loadFromMap({
+                        "##########",
+                        "#P..#....#",
+                        "#.#.#.E..#",
+                        "#.#...#..#",
+                        "#...^.#A.#",
+                        "###.#....#",
+                        "#...#.^..#",
+                        "#.E...#..#",
+                        "#.....#.X#",
+                        "##########"},
+                    "Guarded Corridors");
+        break;
+    case 3:
+        loadFromMap({
+                        "##########",
+                        "#P..#..K.#",
+                        "#.#.#.##.#",
+                        "#.#...A..#",
+                        "#...^....#",
+                        "###D######",
+                        "#....B...#",
+                        "#.E..^...#",
+                        "#.......X#",
+                        "##########"},
+                    "Locked Vault");
+        break;
+    case 4:
+        loadFromMap({
+                        "##########",
+                        "#P.^..A..#",
+                        "#.#.####.#",
+                        "#.#....#.#",
+                        "#.###^.#.#",
+                        "#...E..#.#",
+                        "###.##...#",
+                        "#B..^..E.#",
+                        "#......#X#",
+                        "##########"},
+                    "Trap Maze");
+        break;
+    default:
+        loadFromMap({
+                        "##########",
+                        "#P..^..A.#",
+                        "#.####.#.#",
+                        "#....#.#.#",
+                        "#.##.#...#",
+                        "#K.#.###D#",
+                        "#..#..B..#",
+                        "#A.^.E.^.#",
+                        "#.....B.X#",
+                        "##########"},
+                    "Dragon's Treasury");
+        break;
     }
+}
+
+void Level::loadFromMap(const QVector<QString>& rows, const QString& name) {
+    m_name = name;
+    m_height = rows.size();
+    m_width = rows.isEmpty() ? 0 : rows.first().size();
+    m_tiles = QVector<QVector<Tile>>(m_height, QVector<Tile>(m_width, Tile(TileType::Floor)));
+    m_enemies.clear();
+    m_playerStart = QPoint(1, 1);
+    m_goalPosition = QPoint(m_width - 2, m_height - 2);
 
     for (int y = 0; y < m_height; ++y) {
-        m_tiles[y][0].setType(TileType::Wall);
-        m_tiles[y][m_width - 1].setType(TileType::Wall);
+        for (int x = 0; x < m_width; ++x) {
+            const QChar marker = rows[y][x];
+            switch (marker.toLatin1()) {
+            case '#':
+                m_tiles[y][x].setType(TileType::Wall);
+                break;
+            case '^':
+                m_tiles[y][x].setType(TileType::Trap);
+                break;
+            case 'K':
+                m_tiles[y][x].setType(TileType::Key);
+                break;
+            case 'D':
+                m_tiles[y][x].setType(TileType::LockedDoor);
+                break;
+            case 'X':
+                m_tiles[y][x].setType(TileType::Goal);
+                m_goalPosition = QPoint(x, y);
+                break;
+            case 'P':
+                m_playerStart = QPoint(x, y);
+                break;
+            case 'E':
+                m_enemies.append(Enemy(x, y, EnemyType::Basic));
+                break;
+            case 'A':
+                m_enemies.append(Enemy(x, y, EnemyType::Archer));
+                break;
+            case 'B':
+                m_enemies.append(Enemy(x, y, EnemyType::Brute));
+                break;
+            default:
+                break;
+            }
+        }
     }
-
-    // Internal walls
-    m_tiles[2][2].setType(TileType::Wall);
-    m_tiles[2][3].setType(TileType::Wall);
-    m_tiles[2][4].setType(TileType::Wall);
-    m_tiles[5][5].setType(TileType::Wall);
-    m_tiles[6][5].setType(TileType::Wall);
-    m_tiles[7][5].setType(TileType::Wall);
-
-    // Traps
-    m_tiles[3][6].setType(TileType::Trap);
-    m_tiles[4][7].setType(TileType::Trap);
-    m_tiles[7][3].setType(TileType::Trap);
-
-    // Goal tile
-    m_goalPosition = QPoint(8, 8);
-    m_tiles[m_goalPosition.y()][m_goalPosition.x()].setType(TileType::Goal);
-
-    // Spawn points
-    m_playerStart = QPoint(1, 1);
-
-    m_enemies.clear();
-    m_enemies.append(Enemy(6, 2));
-    m_enemies.append(Enemy(7, 7));
 }
 
 int Level::width() const {
@@ -48,6 +137,14 @@ int Level::width() const {
 
 int Level::height() const {
     return m_height;
+}
+
+int Level::number() const {
+    return m_number;
+}
+
+QString Level::name() const {
+    return m_name;
 }
 
 bool Level::isInside(int x, int y) const {
@@ -66,6 +163,12 @@ TileType Level::tileTypeAt(int x, int y) const {
         return TileType::Wall;
     }
     return m_tiles[y][x].type();
+}
+
+void Level::setTileTypeAt(int x, int y, TileType type) {
+    if (isInside(x, y)) {
+        m_tiles[y][x].setType(type);
+    }
 }
 
 QPoint Level::playerStart() const {

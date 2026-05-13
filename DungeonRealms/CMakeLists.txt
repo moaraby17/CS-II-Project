@@ -20,6 +20,7 @@ set(SOURCES
     src/player.cpp
     src/enemy.cpp
     src/tile.cpp
+    src/projectile.cpp
 )
 
 set(HEADERS
@@ -30,6 +31,7 @@ set(HEADERS
     src/player.h
     src/enemy.h
     src/tile.h
+    src/projectile.h
 )
 
 add_executable(DungeonRealms

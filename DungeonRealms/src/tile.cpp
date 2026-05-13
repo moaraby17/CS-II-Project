@@ -13,5 +13,5 @@ void Tile::setType(TileType type) {
 }
 
 bool Tile::isWalkable() const {
-    return m_type != TileType::Wall;
+    return m_type != TileType::Wall && m_type != TileType::LockedDoor;
 }
