@@ -16,6 +16,7 @@ public:
     void loadLevel(int levelNumber);
     void handlePlayerMove(int dx, int dy);
     void handlePlayerAttack();
+    void skipToNextLevel();
 
     const Level& level() const;
     const Player& player() const;

@@ -35,6 +35,25 @@ void Game::handlePlayerMove(int dx, int dy) {
     emit gameStateChanged();
 }
 
+void Game::skipToNextLevel() {
+    if (m_gameWon) {
+        return;
+    }
+
+    if (m_currentLevel >= TOTAL_LEVELS) {
+        m_gameWon = true;
+        m_statusText = "Victory! You cleared all five dungeon levels.";
+        emit gameStateChanged();
+        emit gameWon();
+        return;
+    }
+
+    const int nextLevel = m_currentLevel + 1;
+    loadLevel(nextLevel);
+    m_statusText = QString("Demo shortcut used. Jumped to Level %1.").arg(nextLevel);
+    emit gameStateChanged();
+}
+
 void Game::handlePlayerAttack() {
     if (m_gameWon) {
         return;

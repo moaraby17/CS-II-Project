@@ -34,6 +34,14 @@ MainWindow::MainWindow(QWidget* parent)
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event) {
+    // Hidden demo helper: jump forward one level without changing normal controls.
+    if (event->key() == Qt::Key_N
+        && event->modifiers().testFlag(Qt::ControlModifier)
+        && event->modifiers().testFlag(Qt::ShiftModifier)) {
+        m_game.skipToNextLevel();
+        return;
+    }
+
     switch (event->key()) {
     case Qt::Key_Up:
     case Qt::Key_W:
