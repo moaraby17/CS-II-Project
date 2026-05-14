@@ -1,0 +1,127 @@
+@startuml
+title Final UML Class Diagram
+
+skinparam classAttributeIconSize 0
+
+class MainWindow {
+  - Game m_game
+  - QGraphicsScene* m_scene
+  - QGraphicsView* m_view
+  - QLabel* m_levelLabel
+  - QLabel* m_hpLabel
+  - QLabel* m_objectiveLabel
+  - QLabel* m_statusLabel
+  + keyPressEvent(QKeyEvent*)
+  - renderGame()
+  - animateProjectile(int, int, int, int, bool)
+  - showLevelCompleteMessage(int)
+  - showVictoryMessage()
+  - showDeathMessage(int)
+}
+
+class Game {
+  - Level m_level
+  - Player m_player
+  - QString m_statusText
+  - int m_currentLevel
+  - bool m_gameWon
+  + startGame()
+  + loadLevel(int)
+  + handlePlayerMove(int, int)
+  + handlePlayerAttack()
+  + statusText() : QString
+  + enemiesRemaining() : int
+  - playerTurn(int, int)
+  - enemyTurn()
+  - attackEnemyAt(int)
+  - advanceAfterGoal()
+}
+
+class Level {
+  - QVector<QVector<Tile>> m_tiles
+  - QVector<Enemy> m_enemies
+  - QPoint m_playerStart
+  - QPoint m_goalPosition
+  - int m_number
+  - QString m_name
+  + loadLevel(int)
+  + isWalkable(int, int) : bool
+  + tileTypeAt(int, int) : TileType
+  + setTileTypeAt(int, int, TileType)
+  + enemies() : QVector<Enemy>
+}
+
+class Tile {
+  - TileType m_type
+  + type() : TileType
+  + setType(TileType)
+  + isWalkable() : bool
+}
+
+class Entity {
+  # int m_x
+  # int m_y
+  # int m_health
+  # int m_maxHealth
+  + setPosition(int, int)
+  + takeDamage(int)
+  + isAlive() : bool
+}
+
+class Player {
+  - int m_attackDamage
+  - bool m_hasKey
+  + attackDamage() : int
+  + pickUpKey()
+  + useKey()
+  + reset(int, int)
+}
+
+class Enemy {
+  - int m_attackDamage
+  - EnemyType m_type
+  + attackDamage() : int
+  + type() : EnemyType
+  + displayLetter() : QString
+}
+
+class Projectile {
+  - QPoint m_startTile
+  - QPoint m_endTile
+  - bool m_fromPlayer
+  + startTile() : QPoint
+  + endTile() : QPoint
+  + isFromPlayer() : bool
+}
+
+enum TileType {
+  Floor
+  Wall
+  Trap
+  Goal
+  LockedDoor
+  Key
+}
+
+enum EnemyType {
+  Basic
+  Archer
+  Brute
+}
+
+MainWindow --> Game : controls and renders
+MainWindow ..> Projectile : animates
+
+Game *-- Level : owns current level
+Game *-- Player : owns player
+
+Level *-- Tile : grid contains
+Level *-- Enemy : contains enemies
+
+Entity <|-- Player
+Entity <|-- Enemy
+
+Tile --> TileType
+Enemy --> EnemyType
+
+@enduml
